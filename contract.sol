@@ -2,11 +2,12 @@ pragma solidity ^0.4.13;
 
 /*
 
-Decentraland Buyer
+Opus Buyer
 ========================
 
-Buys MANA tokens from the crowdsale on your behalf.
+Buys Opus tokens from the crowdsale on your behalf.
 Author: /u/Cintix
+Modified by: @daraosn
 
 */
 
@@ -16,7 +17,7 @@ contract ERC20 {
   function balanceOf(address _owner) constant returns (uint256 balance);
 }
 
-contract DecentralandBuyer {
+contract OpusBuyer {
   // Store the amount of ETH deposited by each account.
   mapping (address => uint256) public balances;
   // Bounty for executing buy.
@@ -31,15 +32,15 @@ contract DecentralandBuyer {
   bool public kill_switch;
   
   // SHA3 hash of kill switch password.
-  bytes32 password_hash = 0x8223cba4d8b54dc1e03c41c059667f6adb1a642a0a07bef5a9d11c18c4f14612;
+  bytes32 password_hash = 0x2d6167e3ba66d98fcd449d7ef1bf1941a1bad393af3c9aad0fbf92f6a544d5e7; // secret
   // Earliest time contract is allowed to buy into the crowdsale.
-  uint256 earliest_buy_block = 4170700;
+  uint256 earliest_buy_block = 4194919; // Aug-23-2017 04:10:17 PM +UTC
   // The developer address.
-  address developer = 0x000Fb8369677b3065dE5821a86Bc9551d5e5EAb9;
+  address developer = 0x00CDac341eF452DC399a4852A8E36404f5b6F7aa; // https://etherscan.io/address/0x00CDac341eF452DC399a4852A8E36404f5b6F7aa
   // The crowdsale address.
-  address public sale = 0xA66d83716c7CFE425B44D0f7ef92dE263468fb3d;
+  address public sale = 0x4355fC160f74328f9b383dF2EC589bB3dFd82Ba0; // https://etherscan.io/address/0x4355fC160f74328f9b383dF2EC589bB3dFd82Ba0
   // The token address.
-  ERC20 public token = ERC20(0x0F5D2fB29fb7d3CFeE444a200298f468908cC942);
+  ERC20 public token = ERC20(0x4355fC160f74328f9b383dF2EC589bB3dFd82Ba0); // https://etherscan.io/token/0x4355fC160f74328f9b383dF2EC589bB3dFd82Ba0
   
   // Allows the developer or anyone with the password to claim the bounty and shut down everything except withdrawals in emergencies.
   function activate_kill_switch(string password) {
@@ -159,7 +160,7 @@ contract DecentralandBuyer {
   // Default function.  Called when a user sends ETH to the contract.
   function () payable {
     // Prevent sale contract from refunding ETH to avoid partial fulfillment.
-    if (msg.sender == address(sale)) throw;
+    if (msg.sender == address(sale)) return; // NOTE: we return instead of throw, we want ETH back if they refund.
     // Delegate to the helper function.
     default_helper();
   }
